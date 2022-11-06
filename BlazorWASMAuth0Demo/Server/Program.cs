@@ -1,8 +1,25 @@
 using Microsoft.AspNetCore.ResponseCompression;
+//for Auth0
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+//end for Auth0
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+//for Auth0
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, c =>
+    {
+        c.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
+        c.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidAudience = builder.Configuration["Auth0:Audience"],
+            ValidIssuer = $"https://{builder.Configuration["Auth0:Domain"]}"
+        };
+    });
+//end for Auth0
+
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -28,6 +45,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+//For Auth0
+app.UseAuthentication();
+app.UseAuthorization();
+//End for Auth0
 
 app.MapRazorPages();
 app.MapControllers();
